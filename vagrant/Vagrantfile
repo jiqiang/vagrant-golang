@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
   #  group: "www-data",
   #  owner: "www-data"
 
-  config.vm.synced_folder "../src", "/home/vagrant/go/src", type: "nfs"
+  config.vm.synced_folder "../src", "/home/vagrant/gocode/src", type: "nfs"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -74,14 +74,24 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", inline: <<-SHELL
 
     if [ ! -f "/home/vagrant/.PROVISIONED" ]; then
-      sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable
       sudo apt-get update
       sudo apt-get -y upgrade
 
-      sudo apt-get install -y nfs-common portmap golang
+      sudo apt-get install -y nfs-common portmap
 
-      echo 'export GOROOT=/usr/lib/go' >> /home/vagrant/.bashrc
-      echo 'export GOPATH=/home/vagrant/go' >> /home/vagrant/.bashrc
+      mkdir -p /home/vagrant/gocode/pkg
+      mkdir -p /home/vagrant/gocode/bin
+      mkdir -p /home/vagrant/gocode/src
+
+      sudo chmod 777 -R gocode
+
+      wget https://storage.googleapis.com/golang/go1.7.4.linux-amd64.tar.gz
+
+      sudo tar -xvf go1.7.4.linux-amd64.tar.gz
+      sudo mv go /usr/local
+
+      echo 'export GOROOT=/usr/local/go' >> /home/vagrant/.bashrc
+      echo 'export GOPATH=/home/vagrant/gocode' >> /home/vagrant/.bashrc
       echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> /home/vagrant/.bashrc
 
       source /home/vagrant/.bashrc
